@@ -1,11 +1,5 @@
 const userService = require('../../services/user/user.service');
 
-exports.authenticate = function(req, res, next) {
-    userService.authenticate(req.body)
-        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
-        .catch(err => next(err));
-}
-
  exports.register = function(req, res, next) {
     userService.create(req.body)
         .then((data) => res.status(200).send(data))

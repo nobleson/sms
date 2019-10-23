@@ -4,7 +4,6 @@ const user = require('../../controllers/user/user.controller');
 
 
 // routes
-router.post('/authenticate', user.authenticate);
 router.post('/register', user.register);
 router.get('/', user.getAll);
 router.get('/current', user.getCurrent);

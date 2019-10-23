@@ -74,8 +74,20 @@
               <div class="form-group">
                 <input id="submitUser" type="button" class="btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-blue" value="Register">
               </div>
-            </form>
-
+            </form> 
+         <!-- <form  class="bg-white rounded pb_form_v1">
+              <h2 class="mb-4 mt-0 text-center">Login</h2>
+              <div class="form-group">
+                <input type="email" id="email" class="form-control pb_height-50 reverse" placeholder="Email">
+              </div>
+              <div class="form-group">
+                <input type="password" id="password" class="form-control pb_height-50 reverse" placeholder="Password">
+              </div>
+            
+              <div class="form-group">
+                <input id="loginUser" type="button" class="btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-blue" value="Login">
+              </div>
+            </form> -->
           </div>
         </div>
       </div>
@@ -561,22 +573,105 @@
 
     <script>
     $(document).ready(function(){
-
+     
       $('#submitUser').on('click',function(){
-         let newUser = new UserModel(
-          $("#displayname").val(),
-          $("#email").val(),
-          $("#phonenumber").val(),
-          $("#password").val(),
-          $("#dateregistered").val()
-
-        ) 
-        let result = newUser.createUserAccount()
-        console.log('User',JSON.stringify(result.user))
-        console.log('Token',JSON.stringify(result.token))
+        let user = new UserModel($("#displayname").val(), $("#email").val(),$("#phonenumber").val(), $("#password").val())  
+         postData(url = 'auth/create', data = user.getData())
+        .then(function(accounts) {
+             // display the accounts page
+            window.sessionStorage.setItem('token', account.token); // store token
+            register(account.auth._id)
+            window.open('_usdb','_self');
+          })
+          .catch(function(error) {
+              // display error message in the login form
+              // ...
+          }); 
     })
-  });
- 
+    $('#loginUser').on('click',function(){
+        
+         authenticate($("#email").val(),$("#password").val())
+          .then(function(authentication) {
+            
+          //    window.sessionStorage.setItem('token', authentication.token); // store token
+             // window.open('_usdb','_self');
+          }) 
+          .catch(function(error) {
+              // display error message in the login form
+              // ...
+          });
+/*           authenticate($("#email").val(),$("#password").val())
+          .then(function(authentication) {
+              window.sessionStorage.setItem('token', authentication.token); // store token
+          })
+          .then(getUserProfile)
+          .then(function(accounts) {
+              // display the accounts page
+              window.open('_usdb','_self');
+          })
+          .catch(function(error) {
+              // display error message in the login form
+              // ...
+          }); */
+
+      })
+    });
+    async function authenticate(email,password) { 
+      let user = new UserModel(null, email, null, password)  
+      let data = await user.loginUser()
+      return data;
+    }
+    async function register(id) { 
+      return await postData('user/register', { _id: id });
+    }
+  async function postData(url = 'auth/create', data = formData) {
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                'Content-Type': 'application/json;  charset=utf-8'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrer: 'no-referrer', // no-referrer, *client
+                body: JSON.stringify(data) // body data type must match "Content-Type" header
+            });
+            return  await response.json(); // parses JSON response into native JavaScript objects
+
+            
+    } 
+    function createUserProfile(id){ 
+        let formData = {
+            _id: id
+        }
+        return fetch('user/register', { 
+            method: 'POST',
+            headers: {
+                'Authorization': window.sessionStorage.getItem('token'), // <= include token
+                'Content-Type': 'application/json; charset=utf-8',
+                'Accept': 'application/json',
+            },
+            body:formData, 
+            credentials: 'include' // <= include session cookie
+            })
+    }
+    
+/*     function getUserProfile() {
+    return fetch('https://api.bobank.com/accounts', { 
+        headers: {
+            'Authorization': 'Token ' + window.sessionStorage.getItem('token'), // <= include token
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json',
+        },
+        credentials: 'include' // <= include session cookie
+    }).then(function(response) {
+        return response.json();
+    })
+  } */
+
     </script>
 
 	</body>

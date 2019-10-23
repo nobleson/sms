@@ -1,10 +1,9 @@
 const config = require('../../config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../../models/user/User');
+const SMSUser = require('../../models/user/SMSUser');
 
 module.exports = {
-    authenticate,
     getAll,
     getById,
     create,
@@ -12,58 +11,27 @@ module.exports = {
     delete: _delete 
 };
 
-async function authenticate({ username, password }) {
-    const user = await User.findOne({ username });
-    if (user && bcrypt.compareSync(password, user.hash)) {
-        const { hash, ...userWithoutHash } = user.toObject();
-        const token = jwt.sign({ sub: user.id }, config.secret);
-        return {
-            ...userWithoutHash,
-            token
-        };
-    }
-}
-
 async function getAll() {
-    return await User.find().select('-hash');
+    return await SMSUser.find();
 }
 
 async function getById(id) {
-    return await User.findById(id).select('-hash');
+    return await SMSUser.findById(id);
 }
 
 async function create(userParam) {
-    // validate
-    if (await User.findOne({ username: userParam.username })) {
-        throw 'Username "' + userParam.username + '" is already taken';
-    }
 
-    const user = new User(userParam);
+    const user = new SMSUser(userParam);
 
-    // hash password
-    if (userParam.password) {
-        user.password = bcrypt.hashSync(userParam.password, 10);
-    }
-    // save user
-    await user.save();
-    const token = await user.generateAuthToken()
-
-    return { user, token }  
+    return  await user.save();
 }
 
 async function update(id, userParam) {
-    const user = await User.findById(id);
+    const user = await SMSUser.findById(id);
 
     // validate
     if (!user) throw 'User not found';
-    if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
-        throw 'Username "' + userParam.username + '" is already taken';
-    }
 
-    // hash password if it was entered
-    if (userParam.password) {
-        userParam.password = bcrypt.hashSync(userParam.password, 10);
-    }
     // copy userParam properties to user
     Object.assign(user, userParam);
 
@@ -71,5 +39,5 @@ async function update(id, userParam) {
 }
 
 async function _delete(id) {
-    await User.findOneAndDelete(id);
+    await SMSUser.findOneAndDelete(id);
 }
