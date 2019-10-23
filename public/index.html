@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="/public/assets/css/helpers.css">
     <link rel="stylesheet" href="/public/assets/css/style.css">
     <link rel="stylesheet" href="/public/assets/css/landing-2.css">
+    <style>
+     .form-animate-error{color: red}
+    </style>
 	</head>
 	<body data-spy="scroll" data-target="#pb-navbar" data-offset="200">
 
@@ -67,19 +70,20 @@
             </div>
           </div>    
           <div class="col-md-5 relative align-self-center">
-            <form  class="bg-white rounded pb_form_v1">
+
+            <form id="registerForm"  class="bg-white rounded pb_form_v1">
               <h2 class="mb-4 mt-0 text-center">Sign Up for Free</h2>
               <div class="form-group">
-                <input type="text" id="displayname" class="form-control pb_height-50 reverse" placeholder="Display Name" required>
+                <input type="text" name="displayName" id="displayname" class="form-control pb_height-50 reverse" placeholder="Display Name">
               </div>
               <div class="form-group">
-                <input type="email" id="email" class="form-control pb_height-50 reverse" placeholder="Email" required>
+                <input type="email" name="email" id="email" class="form-control pb_height-50 reverse" placeholder="Email">
               </div>
               <div class="form-group">
-                  <input type="number" id="phonenumber" class="form-control pb_height-50 reverse" placeholder="Phone Number" required>
+                  <input type="number" name="phoneNumber" id="phonenumber" class="form-control pb_height-50 reverse" placeholder="Phone Number">
                 </div>
               <div class="form-group">
-                <input type="password" id="password" class="form-control pb_height-50 reverse" minlength="8" placeholder="Password" required>
+                <input type="password" name="password" id="password" class="form-control pb_height-50 reverse" placeholder="Password">
               </div>
             
               <div class="form-group">
@@ -88,19 +92,6 @@
               <p class="mt-3">Already have Account?<span><a href="/login" style="color:blue; text-decoration: none;"> Sign In</a></span>
               </p>
             </form> 
-            <!-- <form  class="bg-white rounded pb_form_v1">
-              <h2 class="mb-4 mt-0 text-center">Login</h2>
-              <div class="form-group">
-                <input type="email" id="email" class="form-control pb_height-50 reverse" placeholder="Email">
-              </div>
-              <div class="form-group">
-                <input type="password" id="password" class="form-control pb_height-50 reverse" placeholder="Password">
-              </div>
-            
-              <div class="form-group">
-                <input id="loginUser" type="button" class="btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-blue" value="Login">
-              </div>
-            </form> -->
           </div>
         </div>
       </div>
@@ -565,7 +556,25 @@
         </div>
       </div>
     </footer>
-
+<!-- The modal -->
+<div class="modal fade" id="errorMsg" tabindex="-1" role="dialog" aria-labelledby="modalLabelLarge" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+  <div class="modal-content">
+  
+  <div class="modal-header">
+  <h4 class="modal-title" id="modalLabelLarge">Error</h4>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+  <span aria-hidden="true">&times;</span>
+  </button>
+  </div>
+  
+  <div class="modal-body">
+      An error occured while trying to register. Try it again
+  </div>
+  
+  </div>
+  </div>
+  </div>
     <!-- loader -->
     <div id="pb_loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#1d82ff"/></svg></div>
 
@@ -583,23 +592,55 @@
 
     <script src="/public/assets/js/main.js"></script>
     <script src="/public/assets/js/custom/UserModel.js"></script>
+    <script src="/public/assets/js/jquery.validate.min.js"></script>
 
     <script>
     $(document).ready(function(){
-     
-      $('#submitUser').on('click',function(){
-        let user = new UserModel($("#displayname").val(), $("#email").val(),$("#phonenumber").val(), $("#password").val())  
-         postData(url = 'auth/create', data = user.getData())
-        .then(function(accounts) {
-             // display the accounts page
-            window.sessionStorage.setItem('token', account.token); // store token
-            register(account.auth._id)
-            window.open('_usdb','_self');
+      $("#registerForm").validate({
+            errorElement: "em",
+        errorPlacement: function(error, element) {
+          $(element.parent("div").addClass("form-animate-error"));
+          error.appendTo(element.parent("div"));
+        },
+        success: function(label) {
+          $(label.parent("div").removeClass("form-animate-error"));
+        },
+        rules: {
+            displayName: "required",
+            email: "required",
+            phoneNumber: "required",
+            password: 'required'
+        },
+        messages: { 
+          displayName: "Username is required",
+          email: "valid email is rquired",
+          phoneNumber: "Phonenumber is required",
+          password: 'Password is required'
+        },
+        
+        submitHandler: function(form) {
+          var formData = getFormData($(form));
+         postData(url = 'auth/create', data = formData)
+        .then(function(account) {
+              window.sessionStorage.setItem('token', account.token); // store token
+              return data = registerUser(url = 'user/register',data = {_id:account.auth._id}) 
+          })
+          .then(function(data){
+             $("#displayname").val('')
+             $("#email").val('')
+             $("#phonenumber").val('')
+             $("#password").val('')
+             $("#myToast").toast({ delay: 5000 });
+             $("#myToast").toast('show');
           })
           .catch(function(error) {
-              // display error message in the login form
-              // ...
+            $('#errorMsg').modal('show')
           }); 
+       }
+     });
+
+      $('#submitUser').on('click',function(){
+        $('#registerForm').submit()
     })
     $('#loginUser').on('click',function(){
         
@@ -629,15 +670,21 @@
 
       })
     });
+
+    function getFormData($form){
+    var unindexed_array = $form.serializeArray();
+    var indexed_array = {};
+    $.map(unindexed_array, function(n, i){
+        indexed_array[n['name'].trim()] = n['value'].trim();
+    });
+    return indexed_array;
+    }
     async function authenticate(email,password) { 
       let user = new UserModel(null, email, null, password)  
       let data = await user.loginUser()
       return data;
     }
-    async function register(id) { 
-      return await postData('user/register', { _id: id });
-    }
-  async function postData(url = 'auth/create', data = formData) {
+    async function registerUser(url, data ) { 
             // Default options are marked with *
             const response = await fetch(url, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -653,7 +700,23 @@
                 body: JSON.stringify(data) // body data type must match "Content-Type" header
             });
             return  await response.json(); // parses JSON response into native JavaScript objects
-  
+    } 
+  async function postData(url , data ) { 
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                'Content-Type': 'application/json;  charset=utf-8'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrer: 'no-referrer', // no-referrer, *client
+                body: JSON.stringify(data) // body data type must match "Content-Type" header
+            });
+            return  await response.json(); // parses JSON response into native JavaScript objects
     } 
     function createUserProfile(id){ 
         let formData = {
@@ -684,12 +747,6 @@
     })
   } */
     </script>
-     <script>
-      $(".show-toast").click(function(){
-       $("#myToast").toast({ delay: 5000 });
-       $("#myToast").toast('show');
-      });
-   </script>
   
 	</body>
 </html>

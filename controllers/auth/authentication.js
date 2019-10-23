@@ -9,7 +9,6 @@ exports.authenticate = function(req, res, next) {
  exports.register = function(req, res, next) {
     authService.create(req.body)
         .then(function(data) {
-        console.log('data',JSON.stringify(data))
          res.status(200).send(data)
         })
         .catch(err => next(err));
