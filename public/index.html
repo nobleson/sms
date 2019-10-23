@@ -54,8 +54,19 @@
           </div>
           <div class="col-md-1">
           </div>
+          <div class="toast" id="myToast" style="position: absolute; top: 0; right: 0; color: green; ">
+            <div class="toast-header " style="color: green;">
+                <strong class="mr-auto"><i class="fa fa-grav"></i> Activate Account!</strong>
+                <small>11 mins ago</small>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                <div>Verification link has been sent to your email to activate your account</div>
+            </div>
+          </div>    
           <div class="col-md-5 relative align-self-center">
-
             <form  class="bg-white rounded pb_form_v1">
               <h2 class="mb-4 mt-0 text-center">Sign Up for Free</h2>
               <div class="form-group">
@@ -72,10 +83,12 @@
               </div>
             
               <div class="form-group">
-                <input id="submitUser" type="button" class="btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-blue" value="Register">
+                <input href="/_usdb" id="submitUser" type="button" class=" show-toast btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-blue" value="Register">
               </div>
+              <p class="mt-3">Already have Account?<span><a href="/login" style="color:blue; text-decoration: none;"> Sign In</a></span>
+              </p>
             </form> 
-         <!-- <form  class="bg-white rounded pb_form_v1">
+            <!-- <form  class="bg-white rounded pb_form_v1">
               <h2 class="mb-4 mt-0 text-center">Login</h2>
               <div class="form-group">
                 <input type="email" id="email" class="form-control pb_height-50 reverse" placeholder="Email">
@@ -673,7 +686,13 @@
   } */
 
     </script>
-
+     <script>
+      $(".show-toast").click(function(){
+       $("#myToast").toast({ delay: 5000 });
+       $("#myToast").toast('show');
+      });
+   </script>
+  
 	</body>
 </html>
 

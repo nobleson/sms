@@ -145,11 +145,25 @@ app.use('/public/view/vendor/jquery-easing/', express.static(__dirname + '/publi
  router.get("/",function(req,res){
   res.sendFile(path + "index.html");
 });
+router.get("/register",function(req,res){
+    res.sendFile(path + "view/register.html");
+  });
+router.get("/login",function(req,res){
+    res.sendFile(path + "view/login.html");
+  });
 router.get("/_usdb",function(req,res){ 
     console.log('session',req.session.name) // 'Flavio'
     res.sendFile(path + "view/index.html");
   }); 
-
+router.get("/button",function(req,res){
+    res.sendFile(path + "view/buttons.html");
+  });
+router.get("/school",function(req,res){
+    res.sendFile(path + "view/school.html");
+  });
+router.get("/services",function(req,res){
+    res.sendFile(path + "view/services.html");
+  });
 app.use('/user', require('./routes/user/User'));
 app.use('/auth', require('./routes/auth/authentication'));
 
