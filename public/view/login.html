@@ -13,11 +13,15 @@
 
   <!-- Custom fonts for this template-->
   <link href="/public/view/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-  <link href="/public/view/https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
   <!-- Custom styles for this template-->
   <link href="/public/view/css/sb-admin-2.min.css" rel="stylesheet">
-
+  <style>
+    .form-animate-error{
+      color:red;
+    }
+  </style>
 </head>
 
 <body class="bg-gradient-primary">
@@ -38,12 +42,12 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                   </div>
-                  <form class="user">
+                  <form id="loginForm" class="user" >
                     <div class="form-group">
-                      <input type="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address...">
+                      <input type="email" name="email" id="email" class="form-control form-control-user"  aria-describedby="emailHelp" placeholder="Enter Email Address...">
                     </div>
                     <div class="form-group">
-                      <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
+                      <input type="password" name="password" id="password" class="form-control form-control-user"  placeholder="Password">
                     </div>
                     <div class="form-group">
                       <div class="custom-control custom-checkbox small">
@@ -51,9 +55,12 @@
                         <label class="custom-control-label" for="customCheck">Remember Me</label>
                       </div>
                     </div>
-                    <a href="/_usdb" id="submitUser" class="btn btn-primary btn-user btn-block">
-                      Login
-                    </a>
+                    <div class="form-group">
+                      <a href="/_usdb">
+                        <input   type="button" class="btn btn-primary btn-user btn-block"  value="Login">
+                      </a>
+                    </div>
+                    
                     <hr>
                     <a href="index.html" class="btn btn-google btn-user btn-block">
                       <i class="fab fa-google fa-fw"></i> Login with Google
@@ -90,7 +97,79 @@
 
   <!-- Custom scripts for all pages-->
   <script src="/public/view/js/sb-admin-2.min.js"></script>
+  <script src="/public/view/js/jquery.validate.min.js"></script>
 
+  <script>
+    $(document).ready(function(){
+      $("#loginForm").validate({
+            errorElement: "em",
+        errorPlacement: function(error, element) {
+          $(element.parent("div").addClass("form-animate-error"));
+          error.appendTo(element.parent("div"));
+        },
+        success: function(label) {
+          $(label.parent("div").removeClass("form-animate-error"));
+        },
+        rules: {
+            email: "required",
+            password: "required"
+        },
+        messages: { 
+          email: "valid email is rquired",
+          password: 'Password is required'
+        },
+        
+        submitHandler: function(form) {
+          var formData = getFormData($(form));
+         postData(url = 'auth/create', data = formData)
+        .then(function(account) {
+              window.sessionStorage.setItem('token', account.token); // store token
+              return data = registerUser(url = 'user/register',data = {_id:account.auth._id}) 
+          })
+          .then(function(data){
+             $("#email").val('')
+             $("#password").val('')
+             $("#myToast").toast({ delay: 5000 });
+             $("#myToast").toast('show');
+          })
+          .catch(function(error) {
+            $('#errorMsg').modal('show')
+          }); 
+       }
+     });
+
+      $('#submitUser').on('click',function(){
+        $('#loginForm').submit()
+    })
+    $('#loginUser').on('click',function(){
+        
+         authenticate($("#email").val(),$("#password").val())
+          .then(function(authentication) {
+            
+          //    window.sessionStorage.setItem('token', authentication.token); // store token
+             // window.open('_usdb','_self');
+          }) 
+          .catch(function(error) {
+              // display error message in the login form
+              // ...
+          });
+/*           authenticate($("#email").val(),$("#password").val())
+          .then(function(authentication) {
+              window.sessionStorage.setItem('token', authentication.token); // store token
+          })
+          .then(getUserProfile)
+          .then(function(accounts) {
+              // display the accounts page
+              window.open('_usdb','_self');
+          })
+          .catch(function(error) {
+              // display error message in the login form
+              // ...
+          }); */
+
+      })
+    });
+  </script>
 </body>
 
 </html>

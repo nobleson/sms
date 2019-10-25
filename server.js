@@ -164,6 +164,9 @@ router.get("/school",function(req,res){
 router.get("/services",function(req,res){
     res.sendFile(path + "view/services.html");
   });
+router.get("/cards",function(req,res){
+    res.sendFile(path + "view/cards.html");
+  });
 app.use('/user', require('./routes/user/User'));
 app.use('/auth', require('./routes/auth/authentication'));
 
